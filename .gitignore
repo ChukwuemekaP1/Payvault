@@ -1,0 +1,270 @@
+# ============================================
+# PayVault - Comprehensive Git Ignore
+# ============================================
+
+# ============================================
+# BACKEND (Rust/Cargo)
+# ============================================
+
+# Build output
+/target/
+**/target/
+
+# Cargo lock file (optional: commit if you want reproducible builds)
+Cargo.lock
+
+# Rust backup files
+*.rs.bk
+
+# Environment variables (CRITICAL - never commit!)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Rust analyzer and IDE
+.rust-analyzer/
+*.swp
+*.swo
+*~
+
+# ============================================
+# FRONTEND (Node.js/React)
+# ============================================
+
+# Dependencies
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.js
+
+# Build output
+frontend/dist/
+frontend/build/
+
+# Environment variables (CRITICAL - never commit!)
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.test
+frontend/.env.production
+frontend/.env.*.local
+
+# Testing
+frontend/coverage/
+frontend/.jest-cache/
+
+# Cache
+frontend/.cache/
+frontend/.eslintcache
+frontend/.stylelintcache
+frontend/yarn-error.log
+
+# Vite specific
+frontend/vite.config.ts.timestamp-*
+
+# ============================================
+# IDE / EDITOR
+# ============================================
+
+# VS Code
+.vscode/
+*.code-workspace
+.history/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim
+*.swp
+*.swo
+*~
+._*
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Atom
+*.atom/
+
+# NeoVim
+.shada
+
+# ============================================
+# OPERATING SYSTEM
+# ============================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100/
+.fseventsd/
+.Spotlight-V100/
+.TemporaryItems/
+.Trashes/
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB/
+.AppleDesktop/
+Network Trash Folder/
+Temporary Items/
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.trash-*/
+.nfs*
+
+# ============================================
+# TESTING & COVERAGE
+# ============================================
+
+# Coverage reports
+coverage/
+.nyc_output/
+*.gcda
+*.gcno
+*.gcov
+
+# Test results
+*.tlog
+*.lastcodeanalysissucceeded
+
+# ============================================
+# BUILD ARTIFACTS
+# ============================================
+
+# Compiled binaries
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.app
+
+# Intermediate files
+*.ilk
+*.pdb
+*.idb
+*.obj
+*.lib
+*.exp
+
+# ============================================
+# DATABASE (Local Development)
+# ============================================
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# PostgreSQL temporary files
+*.pid
+*.socket
+
+# ============================================
+# DOCKER & CONTAINERS
+# ============================================
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Container runtime
+node_modules/
+
+# ============================================
+# MISCELLANEOUS
+# ============================================
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.tmp
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Screenshots
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+!.qoder/
+!.qodo/
+
+# Documentation build
+*.md.html
+
+# Package manager locks (optional - uncomment if you don't want to commit them)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# ============================================
+# IMPORTANT: What TO COMMIT
+# ============================================
+# 
+# DO commit:
+# ✓ Source code (.rs, .tsx, .ts, .js, .jsx)
+# ✓ Configuration files (Cargo.toml, package.json)
+# ✓ README files
+# ✓ Documentation (.md files)
+# ✓ .env.example files (templates)
+# ✓ SQL migrations
+# ✓ Test files
+# ✓ Public assets
+#
+# DON'T commit:
+# ✗ Environment variables (.env files)
+# ✗ Build outputs (target/, dist/, node_modules/)
+# ✗ IDE settings
+# ✗ OS files
+# ✗ Logs and caches
+# ✗ Database files
+# ============================================

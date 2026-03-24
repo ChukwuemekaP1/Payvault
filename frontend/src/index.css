@@ -1,0 +1,529 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS Custom Properties ─────────────────────────────────────────────────── */
+
+:root {
+  --primary: #FF5C2B;
+  --background: #0d0d0f;
+  --surface: #1a1a1f;
+  --border: #2a2a30;
+  --text: #e8e6e0;
+  --muted: #6b6872;
+  --success: #00C97A;
+  --error: #FF3B3B;
+  --warning: #FFB800;
+
+  /* Typography scale */
+  --font-serif: "Instrument Serif", serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-sans: "Syne", sans-serif;
+
+  /* Radius tokens */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+}
+
+/* ─── Base Reset + Body ──────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Print styles for PDF export */
+@media print {
+  .no-print,
+  nav,
+  button,
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+  
+  .print\:block {
+    display: block !important;
+  }
+}
+
+html {
+  /* Prevent layout shift from scrollbar appearing/disappearing */
+  overflow-y: scroll;
+  /* Smooth scrolling for anchor links */
+  scroll-behavior: smooth;
+  /* Better text rendering */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  /* Improve font rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  /* Prevent horizontal overflow */
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  isolation: isolate;
+}
+
+/* ─── Typography Defaults ────────────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  line-height: 1.2;
+  color: var(--text);
+  font-weight: 400; /* Instrument Serif looks best at regular weight */
+}
+
+p {
+  font-family: var(--font-sans);
+  color: var(--text);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Monetary / numeric elements get the monospace font */
+.font-mono,
+[data-amount],
+[data-account] {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Dark Scrollbar ─────────────────────────────────────────────────────────── */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a42 transparent;
+}
+
+/* Chrome / Edge / Safari */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #3a3a42;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #4a4a54;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Hide scrollbar when not needed (but keep scroll functionality) */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Focus Styles ───────────────────────────────────────────────────────────── */
+
+/* Remove default outline; our components use ring utilities */
+:focus {
+  outline: none;
+}
+
+/* Only show focus ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid rgba(255, 92, 43, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Selection ──────────────────────────────────────────────────────────────── */
+
+::selection {
+  background-color: rgba(255, 92, 43, 0.25);
+  color: var(--text);
+}
+
+::-moz-selection {
+  background-color: rgba(255, 92, 43, 0.25);
+  color: var(--text);
+}
+
+/* ─── Form Elements Reset ────────────────────────────────────────────────────── */
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input,
+textarea,
+select {
+  font-family: var(--font-sans);
+  font-size: inherit;
+  color: var(--text);
+  background: transparent;
+}
+
+/* Remove autofill yellow background in Chrome */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset !important;
+  -webkit-text-fill-color: var(--text) !important;
+  caret-color: var(--text);
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Remove spinner arrows from number inputs globally */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Remove native search clear button */
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  display: none;
+}
+
+/* ─── Media Elements ─────────────────────────────────────────────────────────── */
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ─── Utility Classes ────────────────────────────────────────────────────────── */
+
+/* Visually hidden but accessible to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Truncate text with ellipsis */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Animation Utilities ────────────────────────────────────────────────────── */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Component Layer Overrides ──────────────────────────────────────────────── */
+
+@layer components {
+  /* Gradient text helper */
+  .text-gradient-primary {
+    background: linear-gradient(135deg, #FF5C2B 0%, #ff8c5a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Glassmorphism surface */
+  .glass {
+    background: rgba(26, 26, 31, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* Orange glow border effect */
+  .glow-border {
+    border-color: transparent;
+    background-image:
+      linear-gradient(var(--surface), var(--surface)),
+      linear-gradient(135deg, rgba(255, 92, 43, 0.5) 0%, rgba(255, 92, 43, 0.05) 100%);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  /* Shimmer loading animation */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+}
+
+/* ─── Print Styles ───────────────────────────────────────────────────────────── */
+
+@media print {
+  /* Force white background for print */
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt;
+  }
+
+  /* Hide navigation and interactive elements */
+  nav,
+  header,
+  footer,
+  .print\:hidden,
+  [aria-label="Main navigation"],
+  button:not([data-print-show]),
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure receipt card is readable */
+  #transaction-receipt {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 24pt !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Override dark text colors for print */
+  #transaction-receipt * {
+    color: #000000 !important;
+    background: transparent !important;
+    border-color: #dddddd !important;
+  }
+
+  /* Preserve amount colors for clarity */
+  #transaction-receipt .text-success,
+  #transaction-receipt [class*="text-success"] {
+    color: #006b40 !important;
+  }
+
+  #transaction-receipt .text-error,
+  #transaction-receipt [class*="text-error"] {
+    color: #c0392b !important;
+  }
+
+  #transaction-receipt .text-primary,
+  #transaction-receipt [class*="text-primary"] {
+    color: #c0392b !important;
+  }
+
+  /* Prevent page breaks inside receipt rows */
+  #transaction-receipt > * {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 1.5cm;
+    size: A4 portrait;
+  }
+
+  /* Ensure links show their href when printed */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666666;
+  }
+
+  /* Don't add href for # and javascript: links */
+  a[href^="#"]::after,
+  a[href^="javascript:"]::after {
+    content: "";
+  }
+}
+
+/* ─── Keyframe Animations ────────────────────────────────────────────────────── */
+/* These supplement the Tailwind config keyframes for cases where we need
+   them in plain CSS (e.g. inside <style> tags in components). */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes flash {
+  0%, 100% { opacity: 1; }
+  50% {
+    opacity: 0.3;
+    background-color: #FFB800;
+  }
+}
+
+@keyframes slide-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-out {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 92, 43, 0.3); }
+  50%       { box-shadow: 0 0 40px rgba(255, 92, 43, 0.6); }
+}
+
+@keyframes bounce-in {
+  0%   { transform: scale(0.3); opacity: 0; }
+  50%  { transform: scale(1.05); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── Sonner Toast Overrides ─────────────────────────────────────────────────── */
+/* Override the default Sonner toast styling to match PayVault's dark theme */
+
+[data-sonner-toaster] {
+  font-family: var(--font-sans) !important;
+}
+
+[data-sonner-toast] {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 1rem !important;
+  font-family: var(--font-sans) !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  border-color: rgba(0, 201, 122, 0.35) !important;
+  background: rgba(0, 201, 122, 0.07) !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  border-color: rgba(255, 59, 59, 0.35) !important;
+  background: rgba(255, 59, 59, 0.07) !important;
+}
+
+[data-sonner-toast][data-type="warning"] {
+  border-color: rgba(255, 184, 0, 0.35) !important;
+  background: rgba(255, 184, 0, 0.07) !important;
+}
+
+[data-sonner-toast][data-type="info"] {
+  border-color: rgba(255, 92, 43, 0.35) !important;
+  background: rgba(255, 92, 43, 0.07) !important;
+}
+
+[data-sonner-toast] [data-title] {
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  color: var(--text) !important;
+}
+
+[data-sonner-toast] [data-description] {
+  font-family: var(--font-sans) !important;
+  font-size: 0.8rem !important;
+  color: var(--muted) !important;
+  margin-top: 2px !important;
+}
+
+[data-sonner-toast] [data-close-button] {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--muted) !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text) !important;
+}

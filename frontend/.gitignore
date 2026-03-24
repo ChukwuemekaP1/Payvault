@@ -1,0 +1,225 @@
+# PayVault Frontend - Git Ignore
+# This file ensures Node.js/React build artifacts are not committed
+
+# ============================================
+# DEPENDENCIES
+# ============================================
+
+# Node modules (NEVER commit these!)
+node_modules/
+.pnp/
+.pnp.js
+
+# Bower components
+bower_components/
+
+# ============================================
+# BUILD OUTPUT
+# ============================================
+
+# Production build output
+dist/
+build/
+out/
+
+# Development server cache
+.vite/
+.fusebox/
+
+# ============================================
+# ENVIRONMENT VARIABLES (CRITICAL)
+# ============================================
+
+# Never commit environment files!
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+.env.*.local
+
+# Template file (DO commit this!)
+!.env.example
+
+# ============================================
+# TESTING
+# ============================================
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Jest cache
+.jest-cache/
+
+# Playwright
+playwright-report/
+test-results/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# ============================================
+# CACHES
+# ============================================
+
+# ESLint
+.eslintcache
+.cache/eslint/
+
+# Stylelint
+.stylelintcache
+
+# General cache
+.cache/
+.parcel-cache/
+tsbuildinfo/
+
+# ============================================
+# IDE / EDITOR FILES
+# ============================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# OPERATING SYSTEM
+# ============================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100/
+.fseventsd/
+.Spotlight-V100/
+.TemporaryItems/
+.Trashes/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.trash-*/
+
+# ============================================
+# LOGS AND DEBUG
+# ============================================
+
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================
+# PACKAGE MANAGER LOCKS
+# ============================================
+
+# Uncomment if you don't want to commit lock files
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# DO commit lock files for reproducible builds
+# unless you have specific reasons not to
+
+# ============================================
+# TEMPORARY FILES
+# ============================================
+
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+*.old
+
+# ============================================
+# SCREENSHOTS & ASSETS
+# ============================================
+
+# Don't commit large asset files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+*.mp4
+*.mov
+*.avi
+
+# Unless they're in public folder
+!public/*.png
+!public/*.jpg
+!public/*.svg
+!public/favicon.ico
+
+# ============================================
+# TYPESCRIPT
+# ============================================
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Generated declaration files (usually committed, but can ignore)
+# *.d.ts
+# *.d.ts.map
+
+# ============================================
+# VITE SPECIFIC
+# ============================================
+
+vite.config.ts.timestamp-*
+vite.config.js.timestamp-*
+
+# ============================================
+# IMPORTANT NOTES
+# ============================================
+#
+# DO COMMIT:
+# ✓ src/*.tsx, src/*.ts, src/*.jsx, src/*.js
+# ✓ public/ assets
+# ✓ package.json
+# ✓ .env.example (template)
+# ✓ README.md
+# ✓ Configuration files (vite.config.ts, tailwind.config.ts, etc.)
+# ✓ tsconfig.json
+#
+# DON'T COMMIT:
+# ✗ node_modules/ (dependencies)
+# ✗ dist/ or build/ (production output)
+# ✗ .env (secrets)
+# ✗ *.log (logs)
+# ✗ IDE settings
+# ✗ .cache/ (caches)
+# ============================================

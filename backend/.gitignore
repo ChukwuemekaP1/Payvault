@@ -1,0 +1,141 @@
+# PayVault Backend - Git Ignore
+# This file ensures Rust/Cargo build artifacts are not committed
+
+# ============================================
+# CARGO / RUST BUILD OUTPUT
+# ============================================
+
+# Primary build output directory
+/target/
+
+# Backup of the project file
+Cargo.lock
+
+# Rust analyzer
+.rust-analyzer/
+
+# ============================================
+# ENVIRONMENT VARIABLES (CRITICAL)
+# ============================================
+
+# Never commit environment files!
+.env
+.env.local
+.env.production
+.env.staging
+.env.test
+.env.*.local
+
+# Template file (DO commit this!)
+!.env.example
+
+# ============================================
+# LOGS AND DEBUG
+# ============================================
+
+*.log
+logs/
+debug/
+*.debug
+
+# ============================================
+# IDE / EDITOR FILES
+# ============================================
+
+# VS Code
+.vscode/
+.settings.json
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.autoload.elc
+
+# ============================================
+# TESTING & COVERAGE
+# ============================================
+
+# Coverage reports
+coverage/
+*.gcda
+*.gcno
+*.gcov
+tarpaulin-report.html
+cobertura.xml
+lcov.info
+
+# Test binaries
+**/tests/**/*.exe
+**/tests/**/*.pdb
+
+# ============================================
+# BUILD ARTIFACTS
+# ============================================
+
+# Compiled objects
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.lib
+*.exp
+
+# Intermediate build files
+*.ilk
+*.pdb (test artifacts)
+*.idb
+*.obj
+
+# ============================================
+# DOCUMENTATION BUILD
+# ============================================
+
+# rustdoc output
+doc/
+
+# ============================================
+# MISCELLANEOUS
+# ============================================
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================
+# IMPORTANT NOTES
+# ============================================
+#
+# DO COMMIT:
+# ✓ src/*.rs files
+# ✓ Cargo.toml
+# ✓ .env.example (template)
+# ✓ db/migrations/*.sql
+# ✓ tests/*.rs
+# ✓ README.md
+#
+# DON'T COMMIT:
+# ✗ target/ (build output)
+# ✗ .env (secrets)
+# ✗ *.log (logs)
+# ✗ IDE settings
+# ============================================

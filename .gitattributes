@@ -1,0 +1,140 @@
+# ============================================
+# PayVault - Git Attributes
+# ============================================
+# This file ensures consistent line endings and encoding across platforms
+
+# ============================================
+# LINE ENDINGS
+# ============================================
+
+# Set default behavior to automatically handle line endings
+* text=auto
+
+# Explicitly declare files that should always use CRLF (Windows)
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Unix shell scripts should use LF
+*.sh text eol=lf
+
+# ============================================
+# SOURCE CODE
+# ============================================
+
+# Rust source files
+*.rs text diff=rust
+
+# TypeScript/JavaScript
+*.ts text
+*.tsx text
+*.js text
+*.jsx text
+
+# Web files
+*.html text
+*.css text
+*.scss text
+*.json text
+
+# Markdown
+*.md text
+
+# Configuration files
+*.toml text
+*.yaml text
+*.yml text
+*.xml text
+
+# SQL files
+*.sql text
+
+# ============================================
+# BINARY FILES
+# ============================================
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.svg text
+
+# Fonts
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+
+# Compiled files
+*.o binary
+*.a binary
+*.so binary
+*.dylib binary
+*.dll binary
+*.exe binary
+*.pdb binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+
+# ============================================
+# EXPORT OPTIONS
+# ============================================
+
+# Don't export certain files when using git archive
+.gitignore export-ignore
+.gitattributes export-ignore
+.env.example export-ignore
+docs/ export-ignore
+scripts/ export-ignore
+.qoder/ export-ignore
+.qodo/ export-ignore
+
+# ============================================
+# DIFF OPTIONS
+# ============================================
+
+# Use word diff for markdown files
+*.md diff=word
+
+# ============================================
+# MERGE STRATEGIES
+# ============================================
+
+# Use union merge for Cargo.lock (safe for dependency lists)
+# Cargo.lock merge=union
+
+# ============================================
+# ENCODING
+# ============================================
+
+# Ensure UTF-8 encoding for all text files
+*.rs working-tree-encoding=UTF-8
+*.ts working-tree-encoding=UTF-8
+*.tsx working-tree-encoding=UTF-8
+*.js working-tree-encoding=UTF-8
+*.jsx working-tree-encoding=UTF-8
+*.html working-tree-encoding=UTF-8
+*.css working-tree-encoding=UTF-8
+*.json working-tree-encoding=UTF-8
+*.md working-tree-encoding=UTF-8
+*.toml working-tree-encoding=UTF-8
+*.yaml working-tree-encoding=UTF-8
+*.yml working-tree-encoding=UTF-8
+*.sql working-tree-encoding=UTF-8
+
+# ============================================
+# LANGUAGE DETECTION
+# ============================================
+
+# Help GitHub recognize the project languages
+*.rs linguist-language=Rust
+*.tsx linguist-language=TypeScript
+*.ts linguist-language=TypeScript
+*.sql linguist-language=SQL
+
+# ============================================
