@@ -289,7 +289,7 @@ Contributions are welcome! Please read our contributing guidelines first.
 
 MIT License - See [LICENSE](LICENSE) file for details
 
-## 👨‍💻 Author
+## 👨‍💻 Author Chukwuemeka Paul Nwokolo
 
 Built with ❤️ using Rust and React
 
