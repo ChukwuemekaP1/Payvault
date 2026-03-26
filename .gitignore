@@ -241,6 +241,16 @@ temp/
 # Documentation build
 *.md.html
 
+# ALL Markdown files (NOT for GitHub)
+# These files are for local reference only
+*.md
+!.qoder/
+!.qodo/
+# Except README.md in root and key directories
+!README.md
+!backend/README.md
+!frontend/README.md
+
 # Personal documentation (NOT for GitHub)
 # These files are for local reference only
 /docs/
