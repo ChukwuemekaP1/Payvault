@@ -1,11 +1,11 @@
 import * as React from "react";
 import { Copy, CheckCircle2, Building2, Info } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "../../lib/utils";
-import { useAuthStore } from "../../store/authStore";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Label } from "../../components/ui/label";
+import { cn } from "../lib/utils";
+import { useAuthStore } from "../store/authStore";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Label } from "../components/ui/label";
 
 // Nigerian banks list
 const NIGERIAN_BANKS = [
