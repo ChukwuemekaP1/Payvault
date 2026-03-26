@@ -12,6 +12,7 @@ use lettre::{
     transport::smtp::authentication::Credentials,
     AsyncSmtpTransport, AsyncTransport, Tokio1Executor,
 };
+use std::path::Path;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -19,8 +20,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("║     PayVault Email Integration Test                  ║");
     println!("╚═══════════════════════════════════════════════════════╝\n");
     
-    // Load configuration from environment
-    dotenvy::dotenv().ok();
+    // Load configuration from .env file
+    let env_path = Path::new(env!("CARGO_MANIFEST_DIR")).join(".env");
+    println!("📄 Loading environment from: {:?}", env_path);
+    
+    if dotenvy::from_path(&env_path).is_err() {
+        eprintln!("⚠ Warning: Could not load .env file from {:?}", env_path);
+        eprintln!("   Will try to use environment variables directly...\n");
+    } else {
+        println!("✓ Environment loaded successfully\n");
+    }
     
     let smtp_host = std::env::var("SMTP_HOST").unwrap_or_else(|_| "smtp.gmail.com".to_string());
     let smtp_port = std::env::var("SMTP_PORT")
