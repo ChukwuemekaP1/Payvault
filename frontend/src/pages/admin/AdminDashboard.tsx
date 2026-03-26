@@ -36,7 +36,7 @@ interface CreditForm {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { logout, accessToken } = useAuthStore();
+  const { logout } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedWallet, setSelectedWallet] = useState<string>("");

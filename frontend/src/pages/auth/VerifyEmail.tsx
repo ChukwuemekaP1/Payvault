@@ -10,7 +10,6 @@ import {
 import { toast } from "sonner";
 import { cn } from "../../lib/utils";
 import { verifyEmail, registerUser, getApiErrorMessage } from "../../lib/api";
-import { useAuthStore } from "../../store/authStore";
 import { Button } from "../../components/ui/button";
 
 import { Label } from "../../components/ui/label";

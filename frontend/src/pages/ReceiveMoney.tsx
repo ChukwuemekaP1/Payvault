@@ -86,8 +86,8 @@ const ReceiveMoney: React.FC = () => {
   const [selectedBank, setSelectedBank] = React.useState<string>("PAYVAULT");
 
   // Get user account details
-  const accountNumber = user?.accountNumber || "Loading...";
-  const accountName = user?.fullName || "Loading...";
+  const accountNumber = user?.account_number || "Loading...";
+  const accountName = user?.full_name || "Loading...";
   const email = user?.email || "";
 
   const selectedBankData = NIGERIAN_BANKS.find(b => b.code === selectedBank);

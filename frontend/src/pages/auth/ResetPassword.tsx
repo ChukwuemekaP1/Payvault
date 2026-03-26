@@ -2,7 +2,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Eye,
   EyeOff,
@@ -10,7 +10,7 @@ import {
   XCircle,
   CheckCircle2,
   KeyRound,
-  AlertTriangle,
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn, getPasswordStrength } from "../../lib/utils";
@@ -23,6 +23,7 @@ import { Label } from "../../components/ui/label";
 
 const resetPasswordSchema = z
   .object({
+    otp: z.string().length(6, "Verification code must be 6 digits"),
     newPassword: z
       .string()
       .min(8, "Password must be at least 8 characters")
@@ -101,53 +102,6 @@ const Requirement: React.FC<{ met: boolean; label: string }> = ({
   </div>
 );
 
-// ─── Invalid Token State ──────────────────────────────────────────────────────
-
-const InvalidTokenView: React.FC = () => {
-  const navigate = useNavigate();
-  return (
-    <div className="flex flex-col items-center gap-5 text-center py-4">
-      <div
-        className={cn(
-          "flex h-16 w-16 items-center justify-center rounded-2xl",
-          "bg-warning/10 border border-warning/30",
-        )}
-      >
-        <AlertTriangle className="h-7 w-7 text-warning" aria-hidden="true" />
-      </div>
-
-      <div className="space-y-2">
-        <h2 className="font-serif text-2xl text-text leading-tight">
-          Invalid reset link
-        </h2>
-        <p className="font-sans text-sm text-muted leading-relaxed max-w-xs">
-          This password reset link is missing or invalid. Please request a new
-          one from the forgot password page.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-2.5 w-full max-w-xs">
-        <Button
-          variant="default"
-          size="md"
-          fullWidth
-          onClick={() => navigate("/auth/forgot-password")}
-        >
-          Request new reset link
-        </Button>
-        <Button
-          variant="ghost"
-          size="md"
-          fullWidth
-          onClick={() => navigate("/auth/login")}
-        >
-          Back to login
-        </Button>
-      </div>
-    </div>
-  );
-};
-
 // ─── Success State ────────────────────────────────────────────────────────────
 
 const SuccessView: React.FC = () => {
@@ -215,11 +169,6 @@ const SuccessView: React.FC = () => {
 // ─── Reset Password Page ──────────────────────────────────────────────────────
 
 const ResetPassword: React.FC = () => {
-  const [searchParams] = useSearchParams();
-
-  // Read the reset token from the URL: /auth/reset-password?token=xxx
-  const token = searchParams.get("token");
-
   // ── Form state ────────────────────────────────────────────────────────────
   const {
     register,
@@ -230,6 +179,7 @@ const ResetPassword: React.FC = () => {
     resolver: zodResolver(resetPasswordSchema),
     mode: "onTouched",
     defaultValues: {
+      otp: "",
       newPassword: "",
       confirmPassword: "",
     },
@@ -255,12 +205,11 @@ const ResetPassword: React.FC = () => {
 
   // ── Submit ────────────────────────────────────────────────────────────────
   const onSubmit = async (values: ResetPasswordFormValues) => {
-    if (!token) return;
     setApiError(null);
 
     try {
       await resetPassword({
-        token,
+        otp: values.otp,
         new_password: values.newPassword,
       });
 
@@ -272,15 +221,16 @@ const ResetPassword: React.FC = () => {
       setSucceeded(true);
     } catch (err: unknown) {
       const message = getApiErrorMessage(err);
-      // Surface token-specific errors more clearly
+      // Surface OTP-specific errors more clearly
       const lowerMsg = message.toLowerCase();
       if (
-        lowerMsg.includes("token") ||
+        lowerMsg.includes("invalid") ||
         lowerMsg.includes("expired") ||
-        lowerMsg.includes("invalid")
+        lowerMsg.includes("otp") ||
+        lowerMsg.includes("code")
       ) {
         setApiError(
-          "This reset link has expired or is no longer valid. Please request a new one.",
+          "Invalid or expired verification code. Please check your email and try again."
         );
       } else {
         setApiError(message);
@@ -340,14 +290,11 @@ const ResetPassword: React.FC = () => {
               "shadow-[0_4px_40px_rgba(0,0,0,0.5)]",
             )}
           >
-            {/* ── No token: show error state ── */}
-            {!token && <InvalidTokenView />}
-
             {/* ── Success state ── */}
-            {token && succeeded && <SuccessView />}
+            {succeeded && <SuccessView />}
 
             {/* ── Form state ── */}
-            {token && !succeeded && (
+            {!succeeded && (
               <div className="space-y-7">
                 {/* Header */}
                 <div className="space-y-4">
@@ -367,10 +314,10 @@ const ResetPassword: React.FC = () => {
 
                   <div className="space-y-1.5">
                     <h1 className="font-serif text-3xl text-text leading-tight">
-                      Set new password
+                      Reset Your Password
                     </h1>
                     <p className="font-sans text-sm text-muted leading-relaxed">
-                      Choose a strong password you haven't used before.
+                      Enter the verification code from your email and choose a new password.
                     </p>
                   </div>
                 </div>
@@ -401,6 +348,41 @@ const ResetPassword: React.FC = () => {
                   noValidate
                   className="space-y-5"
                 >
+                  {/* OTP Field */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="otp" required>
+                      Verification Code
+                    </Label>
+                    <Input
+                      id="otp"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      autoComplete="one-time-code"
+                      autoFocus
+                      placeholder="Enter 6-digit code from email"
+                      error={Boolean(errors.otp)}
+                      aria-describedby={errors.otp ? "otp-error" : undefined}
+                      leftAdornment={
+                        <Mail className="h-4 w-4" aria-hidden="true" />
+                      }
+                      maxLength={6}
+                      {...register("otp")}
+                    />
+                    {errors.otp && (
+                      <p
+                        id="otp-error"
+                        role="alert"
+                        className="font-sans text-xs text-error leading-tight"
+                      >
+                        {errors.otp.message}
+                      </p>
+                    )}
+                    <p className="font-sans text-xs text-muted/70">
+                      Didn't receive it? Check your spam folder or request a new code.
+                    </p>
+                  </div>
+
                   {/* New Password */}
                   <div className="space-y-1.5">
                     <Label htmlFor="newPassword" required>
@@ -583,16 +565,6 @@ const ResetPassword: React.FC = () => {
               </div>
             )}
           </div>
-
-          {/* Token debug info (only in dev) */}
-          {import.meta.env.DEV && token && (
-            <div className="mt-4 rounded-xl border border-border/40 bg-surface/40 px-4 py-3">
-              <p className="font-mono text-[10px] text-muted/60 break-all">
-                <span className="text-muted/40">token: </span>
-                {token}
-              </p>
-            </div>
-          )}
         </div>
       </main>
 

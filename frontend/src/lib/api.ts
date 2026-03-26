@@ -226,7 +226,7 @@ export async function resetPassword(
   data: ResetPasswordRequest
 ): Promise<void> {
   await api.post("/auth/reset-password", {
-    token: data.token,
+    otp: data.otp,
     new_password: data.new_password,
   });
 }

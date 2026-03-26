@@ -2,6 +2,8 @@ export interface User {
   user_id: string;
   email: string;
   role?: string; // Optional for backward compatibility
+  full_name?: string;
+  account_number?: string;
 }
 
 export interface AuthResponse {
@@ -81,7 +83,7 @@ export interface ForgotPasswordRequest {
 }
 
 export interface ResetPasswordRequest {
-  token: string;
+  otp: string;
   new_password: string;
 }
 

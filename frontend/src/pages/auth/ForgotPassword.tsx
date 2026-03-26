@@ -64,9 +64,9 @@ const SuccessState: React.FC<SuccessStateProps> = ({ email, onTryAgain }) => (
     >
       {[
         "Check your inbox (and spam folder)",
-        "Click the link in the email",
-        "You'll be taken to reset your password",
-        "The link expires in 15 minutes",
+        "Look for the 6-digit verification code",
+        "Enter the code on the next page",
+        "The code expires in 15 minutes",
       ].map((step, i) => (
         <div key={i} className="flex items-start gap-2.5">
           <span
@@ -89,7 +89,7 @@ const SuccessState: React.FC<SuccessStateProps> = ({ email, onTryAgain }) => (
     {/* Actions */}
     <div className="flex w-full flex-col gap-3">
       <Link
-        to="/auth/login"
+        to="/auth/reset-password"
         className={cn(
           "flex w-full items-center justify-center gap-2",
           "h-11 rounded-xl",
@@ -102,7 +102,7 @@ const SuccessState: React.FC<SuccessStateProps> = ({ email, onTryAgain }) => (
           "shadow-glow-sm hover:shadow-glow"
         )}
       >
-        Back to Login
+        Continue to Reset Password
       </Link>
 
       <button

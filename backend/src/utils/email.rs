@@ -575,3 +575,128 @@ The PayVault Team
     send_email(mailer, to, subject, &body_text, Some(&body_html), "PayVault").await?;
     Ok(())
 }
+
+/// Sends a password reset email with a verification code.
+///
+/// Called when user requests password reset; includes 6-digit OTP code.
+/// Features:
+/// - Professional HTML template with PayVault branding
+/// - Clear verification code display
+/// - Security warnings and expiry notice
+/// - Support contact information
+pub async fn send_password_reset_email(
+    mailer: &AsyncSmtpTransport<Tokio1Executor>,
+    to: &str,
+    otp: &str,
+    _config: &AppConfig,
+) -> Result<()> {
+    let subject = "Password Reset Request - PayVault";
+
+    // Plain text version
+    let body_text = format!(
+        r#"
+Password Reset Request
+
+You requested to reset your PayVault password.
+
+Your verification code is: {}
+
+This code will expire in 15 minutes.
+
+If you didn't request this password reset, please ignore this email.
+Your account remains secure.
+
+Best regards,
+The PayVault Team
+        "#,
+        otp
+    );
+
+    // Professional HTML version
+    let body_html = format!(
+        r#"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset Request</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f3f4f6;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" style="max-width: 600px; width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Password Reset Request</h1>
+                            <p style="margin: 12px 0 0 0; color: rgba(255, 255, 255, 0.95); font-size: 15px;">Secure your PayVault account</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <p style="margin: 0 0 24px 0; color: #4b5563; font-size: 16px; line-height: 1.6;">You requested to reset your PayVault password. Use the verification code below to proceed:</p>
+                            
+                            <!-- OTP Code Box -->
+                            <table role="presentation" style="width: 100%; margin: 24px 0; border-collapse: collapse;">
+                                <tr>
+                                    <td align="center" style="background-color: #fef3c7; border: 2px dashed #f59e0b; border-radius: 8px; padding: 24px;">
+                                        <span style="display: inline-block; font-size: 36px; font-weight: 700; color: #d97706; letter-spacing: 8px; font-family: 'Courier New', monospace;">{}</span>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Expiry Notice -->
+                            <table role="presentation" style="width: 100%; margin: 20px 0; border-collapse: collapse; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                                <tr>
+                                    <td style="padding: 12px 16px;">
+                                        <p style="margin: 0; color: #92400e; font-size: 14px;">
+                                            <strong>⏰ Expires in 15 minutes</strong><br>
+                                            This code will expire after 15 minutes for your security.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Security Notice -->
+                            <table role="presentation" style="width: 100%; margin: 24px 0; border-collapse: collapse; background-color: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
+                                <tr>
+                                    <td style="padding: 16px;">
+                                        <h4 style="margin: 0 0 8px 0; color: #1e40af; font-size: 15px; font-weight: 600;">🔒 Didn't request this?</h4>
+                                        <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.6;">
+                                            If you didn't request this password reset, you can safely ignore this email. Your account remains secure and no changes have been made.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 24px 0 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                                For security reasons, never share this verification code with anyone. PayVault staff will never ask for this code.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f9fafb; padding: 24px 30px; border-top: 1px solid #e5e7eb; text-align: center;">
+                            <p style="margin: 0 0 12px 0; color: #6b7280; font-size: 14px;">Best regards,<br><strong style="color: #374151; font-size: 15px;">The PayVault Security Team</strong></p>
+                            <p style="margin: 0 0 16px 0; color: #9ca3af; font-size: 12px;">© 2026 PayVault. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 11px;">This is an automated message. Please do not reply to this email.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+        "#,
+        otp
+    );
+
+    send_email(mailer, to, subject, &body_text, Some(&body_html), "PayVault").await?;
+    Ok(())
+}

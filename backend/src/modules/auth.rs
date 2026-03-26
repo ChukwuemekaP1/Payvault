@@ -328,11 +328,11 @@ pub async fn verify_email(
     }
 }
 
-/// Initiates a password reset by generating a random token and storing it in Redis.
+/// Initiates a password reset by generating a 6-digit OTP and storing it in Redis.
 ///
 /// Always returns the same success message regardless of whether the email
 /// exists — prevents user enumeration via the response.
-/// The reset token is a 64-character lowercase hex string (32 random bytes).
+/// Sends email with 6-digit OTP code that expires in 15 minutes.
 #[utoipa::path(
     post,
     path = "/auth/forgot-password",
@@ -353,27 +353,34 @@ pub async fn forgot_password(
         .await?
         .ok_or(AppError::UserNotFound)?;
 
-    // 64-char hex token — each byte printed as two hex digits.
-    let reset_token: String = (0..32)
-        .map(|_| format!("{:02x}", rand::random::<u8>()))
+    // Generate 6-digit OTP
+    let otp: String = (0..6)
+        .map(|_| rand::random::<u8>() % 10)
+        .map(|d| d.to_string())
         .collect();
 
-    // Store under `password_reset:<user_id>` with 1-hour TTL (3 600 s).
+    // Store under `password_reset:<user_id>` with 15-minute TTL (900 s).
     let mut redis = state.redis.get().await?;
     let reset_key = format!("password_reset:{}", user_id);
-    let _: () = redis.set_ex(&reset_key, &reset_token, 3600u64).await?;
+    let _: () = redis.set_ex(&reset_key, &otp, 900u64).await?;
 
-    // TODO: send email containing a link with the reset token.
+    // Send password reset email asynchronously (non-blocking)
+    let _ = crate::utils::email::send_password_reset_email(
+        &state.mailer,
+        email,
+        &otp,
+        &state.config,
+    )
+    .await;
+
     Ok(Json(MessageResponse {
         message: "If an account exists, a password reset email will be sent".to_string(),
     }))
 }
 
-/// Completes a password reset using the token from the reset email.
+/// Completes a password reset using the OTP from the reset email.
 ///
-/// Scans Redis for keys matching `password_reset:*`, finds the one whose
-/// stored value matches the supplied token, then updates the password and
-/// deletes the used token.
+/// Verifies the OTP against Redis, updates the password, and consumes the token.
 #[utoipa::path(
     post,
     path = "/auth/reset-password",
@@ -384,47 +391,37 @@ pub async fn forgot_password(
 )]
 pub async fn reset_password(
     State(state): State<AppState>,
+    auth_user: AuthUser,
     Json(body): Json<serde_json::Value>,
 ) -> Result<Json<MessageResponse>> {
-    let token = body["token"].as_str().ok_or(AppError::InvalidToken)?;
+    let otp = body["otp"].as_str().ok_or(AppError::InvalidToken)?;
     let new_password = body["new_password"]
         .as_str()
         .ok_or(AppError::InvalidToken)?;
 
-    // Scan all reset keys — fine at this scale; for high-volume use a reverse
-    // lookup index (token → user_id) stored separately in Redis.
     let mut redis = state.redis.get().await?;
-    let keys: Vec<String> = redis.keys("password_reset:*").await?;
+    let reset_key = format!("password_reset:{}", auth_user.user_id);
 
-    let mut user_id: Option<Uuid> = None;
-    for key in keys {
-        let stored_token: Option<String> = redis.get(&key).await?;
-        if stored_token.as_deref() == Some(token) {
-            if let Some(uid) = key
-                .strip_prefix("password_reset:")
-                .and_then(|s| Uuid::parse_str(s).ok())
-            {
-                user_id = Some(uid);
-                break;
-            }
+    // Fetch stored OTP
+    let stored_otp: Option<String> = redis.get(&reset_key).await?;
+
+    match stored_otp {
+        Some(stored) if stored == *otp => {
+            // Hash the new password with a fresh Argon2id salt before persisting.
+            let password_hash = hash_password(new_password)?;
+            sqlx::query("UPDATE users SET password_hash = $1 WHERE id = $2")
+                .bind(&password_hash)
+                .bind(auth_user.user_id)
+                .execute(&state.db)
+                .await?;
+
+            // Consume the OTP — one-time use only.
+            let _: () = redis.del(&reset_key).await?;
+
+            Ok(Json(MessageResponse {
+                message: "Password reset successfully".to_string(),
+            }))
         }
+        _ => Err(AppError::InvalidToken),
     }
-
-    let uid = user_id.ok_or(AppError::InvalidToken)?;
-
-    // Hash the new password with a fresh Argon2id salt before persisting.
-    let password_hash = hash_password(new_password)?;
-    sqlx::query("UPDATE users SET password_hash = $1 WHERE id = $2")
-        .bind(&password_hash)
-        .bind(uid)
-        .execute(&state.db)
-        .await?;
-
-    // Consume the token — one-time use only.
-    let reset_key = format!("password_reset:{}", uid);
-    let _: () = redis.del(&reset_key).await?;
-
-    Ok(Json(MessageResponse {
-        message: "Password reset successfully".to_string(),
-    }))
 }

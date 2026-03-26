@@ -241,6 +241,29 @@ temp/
 # Documentation build
 *.md.html
 
+# Personal documentation (NOT for GitHub)
+# These files are for local reference only
+/docs/
+/*.md.html
+CHANGES.md
+CHANGELOG.md
+TODO.md
+NOTES.md
+README.local.md
+DEVELOPMENT.local.md
+*.local.md
+
+# Scripts and tools (outside backend/frontend)
+/scripts/
+/tools/
+/bin/
+
+# Log files
+admin.log
+fix.log
+docs.log
+*.log
+
 # Package manager locks (optional - uncomment if you don't want to commit them)
 # package-lock.json
 # yarn.lock
