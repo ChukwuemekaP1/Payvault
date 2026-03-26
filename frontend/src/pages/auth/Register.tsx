@@ -240,6 +240,23 @@ const Register: React.FC = () => {
         description: "Please check your email for the verification code.",
       });
 
+      // Auto-login with the registered credentials
+      const { loginUser } = await import("../../lib/api");
+      const authResponse = await loginUser({
+        email: values.email,
+        password: values.password,
+      });
+
+      // Store tokens in auth store using the login method
+      const { useAuthStore } = await import("../../store/authStore");
+      const authStore = useAuthStore.getState();
+      authStore.login({
+        user_id: authResponse.user_id,
+        email: authResponse.email,
+        access_token: authResponse.access_token,
+        refresh_token: authResponse.refresh_token,
+      });
+
       // Pass the email to the verify-email page so it can display it
       navigate("/auth/verify-email", {
         state: { email: values.email },

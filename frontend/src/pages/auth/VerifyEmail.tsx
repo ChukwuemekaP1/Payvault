@@ -206,8 +206,6 @@ const VerifyEmail: React.FC = () => {
   const locationState = location.state as VerifyEmailLocationState | null;
   const email = locationState?.email ?? "";
 
-  const { accessToken } = useAuthStore();
-
   // ── State ─────────────────────────────────────────────────────────────────
   const [otp, setOtp] = React.useState("");
   const [isVerifying, setIsVerifying] = React.useState(false);
@@ -216,14 +214,6 @@ const VerifyEmail: React.FC = () => {
   const [verifySuccess, setVerifySuccess] = React.useState(false);
 
   const { remaining, canResend, restart } = useResendCooldown(60);
-
-  // ── If no access token, redirect to login ─────────────────────────────────
-  React.useEffect(() => {
-    if (!accessToken) {
-      toast.error("Please log in before verifying your email.");
-      navigate("/auth/login", { replace: true });
-    }
-  }, [accessToken, navigate]);
 
   // ── Auto-submit when 6 digits are entered ─────────────────────────────────
   React.useEffect(() => {

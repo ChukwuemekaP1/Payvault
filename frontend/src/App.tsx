@@ -17,6 +17,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Transfer from "./pages/Transfer";
+import ReceiveMoney from "./pages/ReceiveMoney";
 import Transactions from "./pages/Transactions";
 import TransactionDetail from "./pages/TransactionDetail";
 import Settings from "./pages/Settings";
@@ -52,6 +53,7 @@ function App() {
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/transfer" element={<Transfer />} />
+                <Route path="/receive" element={<ReceiveMoney />} />
                 <Route path="/transactions" element={<Transactions />} />
                 <Route path="/transactions/:id" element={<TransactionDetail />} />
                 <Route path="/settings" element={<Settings />} />

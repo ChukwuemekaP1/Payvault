@@ -358,3 +358,220 @@ The PayVault Team
     send_email(mailer, to, subject, &body_text, Some(&body_html), "PayVault").await?;
     Ok(())
 }
+
+/// Sends a welcome email after successful account verification.
+///
+/// Called immediately after user verifies their email; includes full account details.
+/// Features:
+/// - Professional welcome message with PayVault branding
+/// - Complete account information (account number, name, email)
+/// - Getting started guide
+/// - Security tips
+pub async fn send_welcome_email(
+    mailer: &AsyncSmtpTransport<Tokio1Executor>,
+    to: &str,
+    full_name: &str,
+    account_number: &str,
+    _config: &AppConfig,
+) -> Result<()> {
+    let subject = "Welcome to PayVault - Your Account is Ready!";
+
+    // Plain text version
+    let body_text = format!(
+        r#"
+Welcome to PayVault, {}!
+
+Your account has been successfully verified and is now active.
+
+ACCOUNT DETAILS:
+================
+Account Number: {}
+Account Name: {}
+Email: {}
+
+GETTING STARTED:
+================
+1. Log in to your dashboard at https://payvault.com
+2. Fund your wallet to start making transfers
+3. Use the "Receive Money" feature to share your account details
+4. Make instant transfers to any bank account in Nigeria
+
+SECURITY TIPS:
+==============
+- Never share your password or OTP with anyone
+- PayVault will never ask for your password via email
+- Enable two-factor authentication for extra security
+- Always log out when using shared devices
+
+NEED HELP?
+==========
+Visit our Help Center or contact support at support@payvault.com
+
+Thank you for choosing PayVault!
+
+Best regards,
+The PayVault Team
+        "#,
+        full_name, account_number, full_name, to
+    );
+
+    // Professional HTML version
+    let body_html = format!(
+        r#"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to PayVault</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f3f4f6;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" style="max-width: 600px; width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 700;">Welcome to PayVault!</h1>
+                            <p style="margin: 12px 0 0 0; color: rgba(255, 255, 255, 0.95); font-size: 16px;">Your secure digital banking experience starts here</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Welcome Message -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <h2 style="margin: 0 0 20px 0; color: #1f2937; font-size: 24px; font-weight: 600;">Hello, {}!</h2>
+                            <p style="margin: 0 0 24px 0; color: #4b5563; font-size: 16px; line-height: 1.6;">Congratulations! Your account has been successfully verified and is now active. You can now enjoy seamless digital banking with PayVault.</p>
+                            
+                            <!-- Account Details Box -->
+                            <table role="presentation" style="width: 100%; margin: 30px 0; border-collapse: collapse; background-color: #f9fafb; border: 2px solid #667eea; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 24px;">
+                                        <h3 style="margin: 0 0 16px 0; color: #667eea; font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Your Account Details</h3>
+                                        
+                                        <!-- Account Number -->
+                                        <table role="presentation" style="width: 100%; margin-bottom: 16px; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                                                    <span style="color: #6b7280; font-size: 13px; font-weight: 500;">ACCOUNT NUMBER</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px 0;">
+                                                    <span style="display: inline-block; background-color: #ffffff; color: #1f2937; font-size: 24px; font-weight: 700; font-family: 'Courier New', monospace; padding: 12px 20px; border-radius: 6px; border: 2px dashed #667eea; letter-spacing: 2px;">{}</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <!-- Account Name -->
+                                        <table role="presentation" style="width: 100%; margin-bottom: 16px; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="padding: 8px 0;">
+                                                    <span style="color: #6b7280; font-size: 13px; font-weight: 500;">ACCOUNT NAME</span><br>
+                                                    <span style="color: #1f2937; font-size: 16px; font-weight: 600;">{}</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <!-- Email -->
+                                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="padding: 8px 0;">
+                                                    <span style="color: #6b7280; font-size: 13px; font-weight: 500;">EMAIL ADDRESS</span><br>
+                                                    <span style="color: #1f2937; font-size: 14px;">{}</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Getting Started Guide -->
+                            <h3 style="margin: 30px 0 16px 0; color: #1f2937; font-size: 18px; font-weight: 600;">Getting Started</h3>
+                            
+                            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 12px 0; vertical-align: top;">
+                                        <span style="display: inline-flex; align-items-center; justify-content: center; width: 28px; height: 28px; background-color: #667eea; color: #ffffff; border-radius: 50%; font-size: 14px; font-weight: 700; margin-right: 12px;">1</span>
+                                    </td>
+                                    <td style="padding: 12px 0;">
+                                        <span style="color: #4b5563; font-size: 15px; line-height: 1.6;"><strong>Log in to your dashboard</strong> at payvault.com to access all features</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 0; vertical-align: top;">
+                                        <span style="display: inline-flex; align-items-center; justify-content: center; width: 28px; height: 28px; background-color: #667eea; color: #ffffff; border-radius: 50%; font-size: 14px; font-weight: 700; margin-right: 12px;">2</span>
+                                    </td>
+                                    <td style="padding: 12px 0;">
+                                        <span style="color: #4b5563; font-size: 15px; line-height: 1.6;"><strong>Fund your wallet</strong> to start making instant transfers</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 0; vertical-align: top;">
+                                        <span style="display: inline-flex; align-items-center; justify-content: center; width: 28px; height: 28px; background-color: #667eea; color: #ffffff; border-radius: 50%; font-size: 14px; font-weight: 700; margin-right: 12px;">3</span>
+                                    </td>
+                                    <td style="padding: 12px 0;">
+                                        <span style="color: #4b5563; font-size: 15px; line-height: 1.6;"><strong>Use "Receive Money"</strong> to share your account details with others</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 0; vertical-align: top;">
+                                        <span style="display: inline-flex; align-items-center; justify-content: center; width: 28px; height: 28px; background-color: #667eea; color: #ffffff; border-radius: 50%; font-size: 14px; font-weight: 700; margin-right: 12px;">4</span>
+                                    </td>
+                                    <td style="padding: 12px 0;">
+                                        <span style="color: #4b5563; font-size: 15px; line-height: 1.6;"><strong>Make instant transfers</strong> to any bank account in Nigeria</span>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Security Tips -->
+                            <table role="presentation" style="width: 100%; margin: 30px 0; border-collapse: collapse; background-color: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <h4 style="margin: 0 0 12px 0; color: #1e40af; font-size: 16px; font-weight: 600;">🔒 Security Tips</h4>
+                                        <ul style="margin: 0; padding-left: 20px; color: #1e40af; font-size: 14px; line-height: 1.8;">
+                                            <li>Never share your password or OTP with anyone</li>
+                                            <li>PayVault will never ask for your password via email</li>
+                                            <li>Enable two-factor authentication for extra security</li>
+                                            <li>Always log out when using shared devices</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Support CTA -->
+                            <table role="presentation" style="width: 100%; margin: 30px 0; border-collapse: collapse; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                                <tr>
+                                    <td style="padding: 20px; text-align: center;">
+                                        <p style="margin: 0 0 12px 0; color: #92400e; font-size: 15px; font-weight: 600;">Need Help Getting Started?</p>
+                                        <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 1.6;">Visit our Help Center or contact our support team at <a href="mailto:support@payvault.com" style="color: #2563eb; text-decoration: none; font-weight: 600;">support@payvault.com</a></p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 30px 0 0 0; color: #6b7280; font-size: 15px; line-height: 1.6;">Thank you for choosing PayVault for your banking needs. We're excited to have you on board!</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f9fafb; padding: 30px; border-top: 1px solid #e5e7eb; text-align: center;">
+                            <p style="margin: 0 0 12px 0; color: #6b7280; font-size: 15px;">Best regards,<br><strong style="color: #374151; font-size: 16px;">The PayVault Team</strong></p>
+                            <p style="margin: 0 0 20px 0; color: #9ca3af; font-size: 13px;">© 2026 PayVault. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px;">This is an automated message. Please do not reply to this email.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+        "#,
+        full_name, account_number, full_name, to
+    );
+
+    send_email(mailer, to, subject, &body_text, Some(&body_html), "PayVault").await?;
+    Ok(())
+}

@@ -29,6 +29,7 @@ pub struct RegisterRequest {
     pub email: String,
     #[validate(length(min = 8))]
     pub password: String,
+    pub name: String,
 }
 
 /// Input for POST /auth/login.
@@ -111,13 +112,14 @@ pub async fn register(
     // Insert user row; role defaults to 'user', email unverified until OTP confirmed.
     let user_id = sqlx::query_scalar::<_, Uuid>(
         r#"
-        INSERT INTO users (email, password_hash, role, is_verified)
-        VALUES ($1, $2, 'user', FALSE)
+        INSERT INTO users (email, password_hash, role, is_verified, full_name)
+        VALUES ($1, $2, 'user', FALSE, $3)
         RETURNING id
         "#,
     )
     .bind(&req.email)
     .bind(&password_hash)
+    .bind(&req.name)
     .fetch_one(&state.db)
     .await?;
 
@@ -271,7 +273,7 @@ pub async fn verify_email(
     State(state): State<AppState>,
     auth_user: AuthUser,
     Json(body): Json<serde_json::Value>,
-) -> Result<Json<MessageResponse>> {
+) -> Result<Json<serde_json::Value>> {
     let otp = body["otp"].as_str().ok_or(AppError::InvalidToken)?;
 
     let mut redis = state.redis.get().await?;
@@ -291,9 +293,35 @@ pub async fn verify_email(
             // Delete the OTP so it cannot be replayed.
             let _: () = redis.del(&otp_key).await?;
 
-            Ok(Json(MessageResponse {
-                message: "Email verified successfully".to_string(),
-            }))
+            // Fetch user details for welcome email
+            let (email, full_name, account_number): (String, String, String) = sqlx::query_as(
+                r#"
+                SELECT u.email, u.full_name, w.account_number
+                FROM users u
+                JOIN wallets w ON u.id = w.user_id
+                WHERE u.id = $1
+                "#,
+            )
+            .bind(auth_user.user_id)
+            .fetch_one(&state.db)
+            .await?;
+
+            // Send welcome email asynchronously (non-blocking)
+            let _ = crate::utils::email::send_welcome_email(
+                &state.mailer,
+                &email,
+                &full_name,
+                &account_number,
+                &state.config,
+            )
+            .await;
+
+            Ok(Json(serde_json::json!({
+                "message": "Email verified successfully",
+                "account_number": account_number,
+                "email": email,
+                "full_name": full_name
+            })))
         }
         // Wrong OTP or expired — return the same error to avoid leaking which.
         _ => Err(AppError::InvalidToken),
