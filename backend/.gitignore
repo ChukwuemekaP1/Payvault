@@ -8,8 +8,8 @@
 # Primary build output directory
 /target/
 
-# Backup of the project file
-Cargo.lock
+# Cargo lock file (committed for reproducible builds)
+!Cargo.lock
 
 # Rust analyzer
 .rust-analyzer/

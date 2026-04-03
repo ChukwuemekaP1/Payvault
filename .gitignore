@@ -10,8 +10,8 @@
 /target/
 **/target/
 
-# Cargo lock file (optional: commit if you want reproducible builds)
-Cargo.lock
+# Cargo lock file (committed for reproducible builds)
+!Cargo.lock
 
 # Rust backup files
 *.rs.bk
