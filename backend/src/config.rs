@@ -70,8 +70,8 @@ pub struct AppConfig {
     pub smtp_from: String,
 
     // ── Paystack ──────────────────────────────────────────────────────────────
-    pub paystack_secret_key: String, // used for Paystack API calls
-    pub paystack_webhook_secret: String, // used to verify inbound webhook HMAC
+    pub paystack_secret_key: Option<String>, // optional for now
+    pub paystack_webhook_secret: Option<String>, // optional for now
 
     // ── Seeded admin account ───────────────────────────────────────────────────
     pub admin_email: String,
@@ -109,8 +109,8 @@ impl AppConfig {
             smtp_username: settings.get_string("SMTP_USERNAME")?,
             smtp_password: settings.get_string("SMTP_PASSWORD")?,
             smtp_from: settings.get_string("SMTP_FROM")?,
-            paystack_secret_key: settings.get_string("PAYSTACK_SECRET_KEY")?,
-            paystack_webhook_secret: settings.get_string("PAYSTACK_WEBHOOK_SECRET")?,
+            paystack_secret_key: settings.get_string("PAYSTACK_SECRET_KEY").ok(),
+            paystack_webhook_secret: settings.get_string("PAYSTACK_WEBHOOK_SECRET").ok(),
             admin_email: settings.get_string("ADMIN_EMAIL")?,
             admin_password: settings.get_string("ADMIN_PASSWORD")?,
         })

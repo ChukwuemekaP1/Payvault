@@ -94,6 +94,16 @@ pub async fn paystack_webhook(
     headers: HeaderMap, // headers extracted separately so body can be read as String
     body: String,       // raw body string — needed verbatim for HMAC verification
 ) -> Result<(StatusCode, Json<serde_json::Value>)> {
+    // Check if Paystack is configured
+    let webhook_secret = state
+        .config
+        .paystack_webhook_secret
+        .as_ref()
+        .ok_or_else(|| {
+            tracing::warn!("Paystack webhook received but PAYSTACK_WEBHOOK_SECRET is not configured");
+            AppError::Internal
+        })?;
+
     // Extract Paystack-Signature header — absence means the request is not from Paystack.
     let signature = headers
         .get("x-paystack-signature")
@@ -101,7 +111,7 @@ pub async fn paystack_webhook(
         .ok_or(AppError::InvalidWebhookSignature)?;
 
     // Compute HMAC-SHA512 over the raw request body using the webhook secret.
-    let mut mac = HmacSha512::new_from_slice(state.config.paystack_webhook_secret.as_bytes())
+    let mut mac = HmacSha512::new_from_slice(webhook_secret.as_bytes())
         .map_err(|_| AppError::InvalidWebhookSignature)?;
     mac.update(body.as_bytes());
 
