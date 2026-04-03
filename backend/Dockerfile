@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy manifests
-COPY backend/Cargo.toml backend/Cargo.lock ./
+COPY Cargo.toml Cargo.lock ./
 
 # Create dummy source for dependency caching
 RUN mkdir src && echo "fn main() {}" > src/main.rs
@@ -20,7 +20,7 @@ RUN mkdir src && echo "fn main() {}" > src/main.rs
 RUN cargo build --release && rm -rf src
 
 # Copy actual source code
-COPY backend/ .
+COPY src/ ./src/
 
 # Build the application
 RUN cargo build --release
