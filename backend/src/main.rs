@@ -78,35 +78,36 @@ async fn main() -> Result<()> {
     // Seed the admin account from env vars if it doesn't exist yet.
     create_admin_user(&state, &config_arc).await?;
 
-    // CORS: production-restricted or wide-open for development.
-    let cors = if config_arc.is_production() {
-        // In production, restrict CORS to specific allowed origins.
-        // Set ALLOWED_ORIGINS env var to comma-separated URLs (e.g. "https://myapp.com,https://api.myapp.com")
-        let allowed_origins = std::env::var("ALLOWED_ORIGINS")
-            .unwrap_or_else(|_| "*".to_string());
-        if allowed_origins == "*" {
-            CorsLayer::new()
-                .allow_origin(Any)
-                .allow_methods(Any)
-                .allow_headers(Any)
-                .expose_headers([axum::http::header::CONTENT_TYPE])
-        } else {
-            let origins: Vec<_> = allowed_origins
-                .split(',')
-                .map(|s| s.trim().parse().expect("Invalid origin in ALLOWED_ORIGINS"))
-                .collect();
-            CorsLayer::new()
-                .allow_origin(origins)
-                .allow_methods(Any)
-                .allow_headers(Any)
-                .expose_headers([axum::http::header::CONTENT_TYPE])
-        }
+    // CORS: allow Vercel frontend + any origin for development.
+    let allowed_origins = std::env::var("ALLOWED_ORIGINS")
+        .unwrap_or_else(|_| "https://payvault-iota.vercel.app".to_string());
+
+    let cors = if config_arc.is_production() && allowed_origins != "*" {
+        let origins: Vec<_> = allowed_origins
+            .split(',')
+            .filter_map(|s| {
+                let trimmed = s.trim();
+                trimmed.parse().ok()
+            })
+            .collect();
+        tracing::info!("CORS allowed origins: {:?}", origins);
+        CorsLayer::new()
+            .allow_origin(origins)
+            .allow_methods(Any)
+            .allow_headers(Any)
+            .expose_headers([
+                axum::http::header::CONTENT_TYPE,
+                axum::http::header::AUTHORIZATION,
+            ])
     } else {
         CorsLayer::new()
             .allow_origin(Any)
             .allow_methods(Any)
             .allow_headers(Any)
-            .expose_headers([axum::http::header::CONTENT_TYPE])
+            .expose_headers([
+                axum::http::header::CONTENT_TYPE,
+                axum::http::header::AUTHORIZATION,
+            ])
     };
 
     // Layer order (outermost applied last): CORS → Gzip compression → per-route middleware.
