@@ -48,11 +48,15 @@ pub async fn idempotency_middleware(
     // Namespace the Redis key to avoid collisions with other key spaces.
     let redis_key = format!("idempotency:{}", idempotency_key);
 
-    let mut redis = state
-        .redis
-        .get()
-        .await
-        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+    let mut redis = match state.redis().await {
+        Ok(conn) => conn,
+        Err(e) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Redis not available".to_string(),
+            ))
+        }
+    };
 
     // Cache hit — return the stored response body without calling the handler.
     let cached_response: Option<String> = redis
