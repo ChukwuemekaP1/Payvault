@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "type-check": "tsc --noEmit",
-    "preview": "vite preview"
+    "dev": "npx vite",
+    "build": "npx vite build",
+    "type-check": "npx tsc --noEmit",
+    "preview": "npx vite preview"
   },
   "dependencies": {
     "react": "^18.3.1",
