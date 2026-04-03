@@ -34,11 +34,11 @@ pub async fn rate_limit_middleware(
         .map(|ci| ci.0.ip().to_string())
         .unwrap_or_else(|| "unknown".to_string());
 
-    let mut redis = state
-        .redis
-        .get()
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    // If Redis is not configured, allow the request through
+    let mut redis = match state.redis().await {
+        Ok(conn) => conn,
+        Err(_) => return Ok(next.run(req).await),
+    };
 
     // Namespace the key per IP to isolate each client's counter.
     let key = format!("rate_limit:{}", client_ip);

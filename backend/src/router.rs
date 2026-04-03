@@ -155,7 +155,7 @@ async fn health_check(state: axum::extract::State<AppState>) -> impl axum::respo
         match redis_pool.get().await {
             Ok(mut conn) => {
                 use deadpool_redis::redis::AsyncCommands;
-                let _: String = conn.ping("PING").await.unwrap_or_default();
+                let _: () = conn.ping("PING").await.unwrap_or(());
                 true
             }
             Err(_) => false,
