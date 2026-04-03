@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for PayVault API
 # Stage 1: Builder
-FROM rust:1.75-bookworm AS builder
+FROM rust:bookworm AS builder
 
 WORKDIR /app
 
@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Ensure Rust is up to date
+RUN rustup self update -y && rustup update stable
 
 # Copy manifests
 COPY backend/Cargo.toml backend/Cargo.lock ./
