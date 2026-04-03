@@ -1,7 +1,7 @@
 # ------------------------
 # Stage 1: Build Rust app
 # ------------------------
-FROM rust:1.75-bookworm AS builder
+FROM rust:1.81-bookworm AS builder
 
 WORKDIR /app
 
@@ -10,9 +10,6 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# Upgrade Rust to latest stable to handle Cargo.lock version 4
-RUN rustup self update && rustup update stable
 
 # Copy manifest files first for dependency caching
 COPY backend/Cargo.toml backend/Cargo.lock ./
