@@ -1,57 +1,55 @@
-# Multi-stage Dockerfile for PayVault API
-# Stage 1: Builder
-FROM rust:bookworm AS builder
+# ------------------------
+# Stage 1: Build Rust app
+# ------------------------
+FROM rust:1.75-bookworm AS builder
 
 WORKDIR /app
 
-# Install dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Ensure Rust is up to date
-RUN rustup self update -y && rustup update stable
+# Upgrade Rust to latest stable to handle Cargo.lock version 4
+RUN rustup self update && rustup update stable
 
-# Copy manifests
+# Copy manifest files first for dependency caching
 COPY backend/Cargo.toml backend/Cargo.lock ./
 
-# Create dummy source for dependency caching
+# Create dummy src to cache dependencies
 RUN mkdir src && echo "fn main() {}" > src/main.rs
 
-# Download and compile dependencies
-RUN cargo build --release && rm -rf src
-
-# Copy actual source code
-COPY backend/src/ ./src/
-
-# Build the application
+# Build dependencies only
 RUN cargo build --release
 
-# Stage 2: Runtime
+# Remove dummy src
+RUN rm -rf src
+
+# Copy actual source code
+COPY backend/src ./src
+
+# Build final binary
+RUN cargo build --release
+
+# ------------------------
+# Stage 2: Minimal runtime image
+# ------------------------
 FROM debian:bookworm-slim
 
 WORKDIR /app
 
-# Install runtime dependencies
+# Runtime dependencies
 RUN apt-get update && apt-get install -y \
+    libssl-dev \
     ca-certificates \
-    libssl3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy binary from builder
-COPY --from=builder /app/target/release/payvault .
+# Copy the compiled binary from builder
+COPY --from=builder /app/target/release/payvault /app/payvault
 
-# Create non-root user
-RUN useradd -r -u 1000 payvault
-USER payvault
-
-# Expose port
+# Expose your app port
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
-
-# Run the application
+# Run the app
 CMD ["./payvault"]
