@@ -100,7 +100,10 @@ impl AppConfig {
                 .unwrap_or_else(|_| "development".to_string())
                 .parse()
                 .unwrap_or(AppEnv::Development),
-            app_port: settings.get_int("APP_PORT")? as u16,
+            // Fall back to PORT env var (Render sets PORT, not APP_PORT)
+            app_port: settings
+                .get_int("APP_PORT")
+                .or_else(|_| settings.get_int("PORT"))? as u16,
             smtp_host: settings.get_string("SMTP_HOST")?,
             smtp_port: settings.get_int("SMTP_PORT")? as u16,
             smtp_username: settings.get_string("SMTP_USERNAME")?,

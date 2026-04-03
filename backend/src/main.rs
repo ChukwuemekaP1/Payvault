@@ -80,12 +80,36 @@ async fn main() -> Result<()> {
     // Seed the admin account from env vars if it doesn't exist yet.
     create_admin_user(&state, &config_arc).await?;
 
-    // CORS: wide-open for development; tighten allow_origin in production.
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any)
-        .expose_headers([axum::http::header::CONTENT_TYPE]);
+    // CORS: production-restricted or wide-open for development.
+    let cors = if config_arc.is_production() {
+        // In production, restrict CORS to specific allowed origins.
+        // Set ALLOWED_ORIGINS env var to comma-separated URLs (e.g. "https://myapp.com,https://api.myapp.com")
+        let allowed_origins = std::env::var("ALLOWED_ORIGINS")
+            .unwrap_or_else(|_| "*".to_string());
+        if allowed_origins == "*" {
+            CorsLayer::new()
+                .allow_origin(Any)
+                .allow_methods(Any)
+                .allow_headers(Any)
+                .expose_headers([axum::http::header::CONTENT_TYPE])
+        } else {
+            let origins: Vec<_> = allowed_origins
+                .split(',')
+                .map(|s| s.trim().parse().expect("Invalid origin in ALLOWED_ORIGINS"))
+                .collect();
+            CorsLayer::new()
+                .allow_origin(origins)
+                .allow_methods(Any)
+                .allow_headers(Any)
+                .expose_headers([axum::http::header::CONTENT_TYPE])
+        }
+    } else {
+        CorsLayer::new()
+            .allow_origin(Any)
+            .allow_methods(Any)
+            .allow_headers(Any)
+            .expose_headers([axum::http::header::CONTENT_TYPE])
+    };
 
     // Layer order (outermost applied last): CORS → Gzip compression → per-route middleware.
     let app: Router = create_router(state)
@@ -93,7 +117,9 @@ async fn main() -> Result<()> {
         .layer(CompressionLayer::new());
 
     let addr = format!("0.0.0.0:{}", config_arc.app_port);
-    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(&addr)
+        .await
+        .expect("Failed to bind to address");
 
     tracing::info!("Server listening on {}", addr);
 
