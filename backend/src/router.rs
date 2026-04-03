@@ -149,38 +149,22 @@ async fn health_check(state: axum::extract::State<AppState>) -> impl axum::respo
         .await
         .is_ok();
 
-    // Acquire a Redis connection and send PING; any error → unhealthy.
-    // If Redis is not configured, report it as unhealthy but don't fail the whole check.
-    let redis_healthy = if let Some(ref redis_pool) = state.redis {
-        match redis_pool.get().await {
-            Ok(mut conn) => {
-                let result: Result<String, _> =
-                    deadpool_redis::redis::cmd("PING").query_async(&mut *conn).await;
-                result.is_ok()
-            }
-            Err(_) => false,
-        }
+    // NOTE: Redis health check disabled — crate TLS bug (0.29-0.31).
+    let redis_healthy = false;
+
+    let status = if db_healthy {
+        StatusCode::OK
     } else {
-        false
+        StatusCode::SERVICE_UNAVAILABLE
     };
 
-    if !redis_healthy {
-        return (
-            StatusCode::SERVICE_UNAVAILABLE,
-            axum::Json(json!({
-                "status": "unhealthy",
-                "database": db_healthy,
-                "redis": false
-            })),
-        );
-    }
-
     (
-        StatusCode::OK,
+        status,
         axum::Json(json!({
-            "status": "healthy",
+            "status": if status == StatusCode::OK { "healthy" } else { "unhealthy" },
             "database": db_healthy,
-            "redis": true
+            "redis": redis_healthy,
+            "note": "Redis temporarily disabled — upstream crate TLS bug"
         })),
     )
 }

@@ -22,14 +22,6 @@ pub enum AppError {
     #[error("Database error: {0}")]
     Database(#[from] sqlx::Error),
 
-    /// Wraps redis command errors (e.g. GET/SET failures).
-    #[error("Redis error: {0}")]
-    Redis(#[from] deadpool_redis::redis::RedisError),
-
-    /// Wraps deadpool pool-acquisition errors (pool exhausted / timeout).
-    #[error("Redis pool error: {0}")]
-    RedisPool(#[from] deadpool_redis::PoolError),
-
     /// Wraps jsonwebtoken encode/decode errors.
     #[error("JWT error: {0}")]
     Jwt(#[from] jsonwebtoken::errors::Error),
@@ -127,20 +119,6 @@ impl IntoResponse for AppError {
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Database error occurred".to_string(),
-                )
-            }
-            AppError::Redis(e) => {
-                tracing::error!("Redis error: {}", e);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "Cache service unavailable".to_string(),
-                )
-            }
-            AppError::RedisPool(e) => {
-                tracing::error!("Redis pool error: {}", e);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "Cache service unavailable".to_string(),
                 )
             }
             AppError::Jwt(e) => {

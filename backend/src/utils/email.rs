@@ -109,6 +109,7 @@ pub async fn send_email(
 /// - Plain text fallback for accessibility
 /// - Responsive design for mobile/desktop
 /// - Clear call-to-action styling
+#[allow(dead_code)]
 pub async fn send_otp_email(
     mailer: &AsyncSmtpTransport<Tokio1Executor>,
     to: &str,
@@ -367,6 +368,7 @@ The PayVault Team
 /// - Complete account information (account number, name, email)
 /// - Getting started guide
 /// - Security tips
+#[allow(dead_code)]
 pub async fn send_welcome_email(
     mailer: &AsyncSmtpTransport<Tokio1Executor>,
     to: &str,
@@ -584,6 +586,7 @@ The PayVault Team
 /// - Clear verification code display
 /// - Security warnings and expiry notice
 /// - Support contact information
+#[allow(dead_code)]
 pub async fn send_password_reset_email(
     mailer: &AsyncSmtpTransport<Tokio1Executor>,
     to: &str,

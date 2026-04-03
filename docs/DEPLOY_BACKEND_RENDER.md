@@ -60,7 +60,7 @@ Once database is ready:
 
 Format:
 ```
-postgresql://user:password@hostname:5432/payvault?sslmode=require
+postgresql://payvault_db_user:pEN3dtaEapTibS1K1sw96uv1ZDjfsbDH@dpg-d77mdlea2pns73ast7v0-a/payvault_db
 ```
 
 **Save this!** You'll need it in Step 4.
@@ -93,6 +93,10 @@ If you prefer Upstash:
 3. Create Redis database
 4. Copy REST API URL or password
 
+
+The upstash key 
+UPSTASH_REDIS_REST_URL="https://large-grackle-76106.upstash.io"
+UPSTASH_REDIS_REST_TOKEN="gQAAAAAAASlKAAIncDJiNjA3NGM3NjRhYmM0YjhmYWFmZTBmOTE0NTNhN2M4ZnAyNzYxMDY"
 ---
 
 ### Step 4: Create Web Service

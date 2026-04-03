@@ -65,6 +65,7 @@ pub fn generate_access_token(
 /// Structurally identical to the access token but uses `config.jwt_refresh_ttl`
 /// (typically 7 days) so the client can obtain new access tokens without
 /// re-entering credentials.
+#[allow(dead_code)]
 pub fn generate_refresh_token(
     user_id: Uuid,
     email: &str,

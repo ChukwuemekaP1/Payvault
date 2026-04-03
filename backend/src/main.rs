@@ -15,7 +15,6 @@ use crate::error::Result;
 use crate::router::create_router;
 use crate::state::AppState;
 use axum::Router;
-use deadpool_redis::Config as RedisConfig;
 use lettre::AsyncSmtpTransport;
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
@@ -57,18 +56,10 @@ async fn main() -> Result<()> {
 
     tracing::info!("Database migrations completed successfully");
 
-    // deadpool-redis pool — optional; if REDIS_URL is not set, Redis is skipped.
-    let redis_pool = if let Some(ref redis_url) = config_arc.redis_url {
-        let redis_config = RedisConfig::from_url(redis_url);
-        Some(
-            redis_config
-                .create_pool(Some(deadpool::Runtime::Tokio1))
-                .expect("Failed to create Redis pool"),
-        )
-    } else {
-        tracing::warn!("REDIS_URL not set — Redis is disabled");
-        None
-    };
+    // NOTE: Redis temporarily disabled — upstream `redis` crate TLS bug (0.29-0.31).
+    // Auth features requiring Redis (OTP, token refresh, rate limiting, idempotency)
+    // are disabled until the crate fixes their tokio-rustls integration.
+    tracing::warn!("Redis is temporarily disabled — known upstream crate TLS bug");
 
     // SMTP mailer using lettre's async STARTTLS transport.
     // Credentials are injected at build time; the connection is lazy (connects on first send).
@@ -82,7 +73,7 @@ async fn main() -> Result<()> {
             .build();
 
     // Single shared state object cloned cheaply into every handler via Arc.
-    let state = AppState::new(db_pool, redis_pool, config_arc.clone(), mailer);
+    let state = AppState::new(db_pool, config_arc.clone(), mailer);
 
     // Seed the admin account from env vars if it doesn't exist yet.
     create_admin_user(&state, &config_arc).await?;
