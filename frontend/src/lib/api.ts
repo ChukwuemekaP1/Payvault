@@ -19,7 +19,7 @@ import type {
   WalletLookupResponse,
 } from "../types";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const BASE_URL = import.meta.env.VITE_API_URL || "https://payvault-pr74.onrender.com";
 
 // ─── Refresh Token Queue ─────────────────────────────────────────────────────
 // Prevents multiple simultaneous refresh calls when many requests 401 at once.
@@ -69,6 +69,8 @@ api.interceptors.request.use(
 );
 
 // ─── Response Interceptor ────────────────────────────────────────────────────
+// NOTE: Token refresh is disabled on backend (Redis unavailable).
+// On 401, we log the user out immediately instead of attempting refresh.
 
 api.interceptors.response.use(
   (response) => response,
@@ -77,67 +79,13 @@ api.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // Only attempt refresh on 401 and if we haven't already retried this request
+    // On 401, log out immediately — token refresh is disabled on backend
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-      // If we are already refreshing, queue this request until refresh completes
-      if (isRefreshing) {
-        return new Promise<string>((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((newToken) => {
-            if (originalRequest.headers) {
-              originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-            }
-            return api(originalRequest);
-          })
-          .catch((err: unknown) => Promise.reject(err));
-      }
-
       originalRequest._retry = true;
-      isRefreshing = true;
-
-      const { refreshToken, updateTokens, logout } = useAuthStore.getState();
-
-      // No refresh token — log out immediately
-      if (!refreshToken) {
-        isRefreshing = false;
-        processQueue(error, null);
-        logout();
-        window.location.href = "/auth/login";
-        return Promise.reject(error);
-      }
-
-      try {
-        // Use a raw axios call (not our instance) to avoid interceptor loops
-        const refreshResponse = await axios.post<RefreshTokenResponse>(
-          `${BASE_URL}/auth/refresh`,
-          null,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${refreshToken}`,
-            },
-          }
-        );
-
-        const { access_token, refresh_token } = refreshResponse.data;
-        updateTokens(access_token, refresh_token);
-
-        // Update the header on the failed request and retry it
-        if (originalRequest.headers) {
-          originalRequest.headers["Authorization"] = `Bearer ${access_token}`;
-        }
-
-        processQueue(null, access_token);
-        return api(originalRequest);
-      } catch (refreshError: unknown) {
-        processQueue(refreshError, null);
-        logout();
-        window.location.href = "/auth/login";
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
+      const { logout } = useAuthStore.getState();
+      logout();
+      window.location.href = "/auth/login";
+      return Promise.reject(error);
     }
 
     return Promise.reject(error);
