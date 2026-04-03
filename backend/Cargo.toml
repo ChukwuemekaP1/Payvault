@@ -15,7 +15,6 @@ sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "uuid", "chro
 
 # Redis
 deadpool-redis = { version = "0.18", features = ["rt_tokio_1"] }
-redis = { version = "0.27", features = ["tls-rustls"] }
 deadpool = { version = "0.12", features = ["rt_tokio_1"] }
 
 # Authentication & Security

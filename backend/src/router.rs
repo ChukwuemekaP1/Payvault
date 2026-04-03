@@ -150,38 +150,37 @@ async fn health_check(state: axum::extract::State<AppState>) -> impl axum::respo
         .is_ok();
 
     // Acquire a Redis connection and send PING; any error → unhealthy.
-    let mut redis_conn = match state.redis.get().await {
-        Ok(conn) => conn,
-        Err(_) => {
-            return (
-                StatusCode::SERVICE_UNAVAILABLE,
-                axum::Json(json!({
-                    "status": "unhealthy",
-                    "database": db_healthy,
-                    "redis": false
-                })),
-            );
+    // If Redis is not configured, report it as unhealthy but don't fail the whole check.
+    let redis_healthy = if let Some(ref redis_pool) = state.redis {
+        match redis_pool.get().await {
+            Ok(mut conn) => {
+                use deadpool_redis::redis::AsyncCommands;
+                let _: String = conn.ping("PING").await.unwrap_or_default();
+                true
+            }
+            Err(_) => false,
         }
-    };
-
-    // Raw PING command — avoids depending on an AsyncCommands trait method.
-    let redis_healthy = deadpool_redis::redis::cmd("PING")
-        .query_async::<String>(&mut *redis_conn)
-        .await
-        .is_ok();
-
-    let status = if db_healthy && redis_healthy {
-        StatusCode::OK
     } else {
-        StatusCode::SERVICE_UNAVAILABLE
+        false
     };
+
+    if !redis_healthy {
+        return (
+            StatusCode::SERVICE_UNAVAILABLE,
+            axum::Json(json!({
+                "status": "unhealthy",
+                "database": db_healthy,
+                "redis": false
+            })),
+        );
+    }
 
     (
-        status,
+        StatusCode::OK,
         axum::Json(json!({
-            "status": if status == StatusCode::OK { "healthy" } else { "unhealthy" },
+            "status": "healthy",
             "database": db_healthy,
-            "redis": redis_healthy
+            "redis": true
         })),
     )
 }

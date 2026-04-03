@@ -136,7 +136,7 @@ pub async fn register(
     .await?;
 
     // Store OTP in Redis under `otp:<user_id>` with a 15-minute TTL (900 s).
-    let mut redis = state.redis.get().await?;
+    let mut redis = state.redis().await?;
     let otp_key = format!("otp:{}", user_id);
     let _: () = redis.set_ex(&otp_key, &otp, 900u64).await?;
 
@@ -197,7 +197,7 @@ pub async fn login(
 
     // Store MD5 hash of the refresh token keyed by `refresh_token:<user_id>:<random_uuid>`.
     // The UUID suffix allows multiple simultaneous sessions per user.
-    let mut redis = state.redis.get().await?;
+    let mut redis = state.redis().await?;
     let refresh_key = format!("refresh_token:{}:{}", user_id, Uuid::new_v4());
     let token_hash = format!("{:x}", md5::compute(&refresh_token));
     let _: () = redis.set_ex(&refresh_key, &token_hash, 604800u64).await?; // 7 days
@@ -243,7 +243,7 @@ pub async fn refresh_token(
     )?;
 
     // Record the new refresh token hash; old hash remains until its TTL expires.
-    let mut redis = state.redis.get().await?;
+    let mut redis = state.redis().await?;
     let refresh_key = format!("refresh_token:{}:{}", auth_user.user_id, Uuid::new_v4());
     let token_hash = format!("{:x}", md5::compute(&refresh_token));
     let _: () = redis.set_ex(&refresh_key, &token_hash, 604800u64).await?;
@@ -276,7 +276,7 @@ pub async fn verify_email(
 ) -> Result<Json<serde_json::Value>> {
     let otp = body["otp"].as_str().ok_or(AppError::InvalidToken)?;
 
-    let mut redis = state.redis.get().await?;
+    let mut redis = state.redis().await?;
     let otp_key = format!("otp:{}", auth_user.user_id);
 
     // Fetch stored OTP; None means it expired or was never set.
@@ -360,7 +360,7 @@ pub async fn forgot_password(
         .collect();
 
     // Store under `password_reset:<user_id>` with 15-minute TTL (900 s).
-    let mut redis = state.redis.get().await?;
+    let mut redis = state.redis().await?;
     let reset_key = format!("password_reset:{}", user_id);
     let _: () = redis.set_ex(&reset_key, &otp, 900u64).await?;
 
@@ -399,7 +399,7 @@ pub async fn reset_password(
         .as_str()
         .ok_or(AppError::InvalidToken)?;
 
-    let mut redis = state.redis.get().await?;
+    let mut redis = state.redis().await?;
     let reset_key = format!("password_reset:{}", auth_user.user_id);
 
     // Fetch stored OTP

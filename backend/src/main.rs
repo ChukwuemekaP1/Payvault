@@ -57,11 +57,18 @@ async fn main() -> Result<()> {
 
     tracing::info!("Database migrations completed successfully");
 
-    // deadpool-redis pool — async Redis connections backed by Tokio runtime.
-    let redis_config = RedisConfig::from_url(&config_arc.redis_url);
-    let redis_pool = redis_config
-        .create_pool(Some(deadpool::Runtime::Tokio1))
-        .expect("Failed to create Redis pool");
+    // deadpool-redis pool — optional; if REDIS_URL is not set, Redis is skipped.
+    let redis_pool = if let Some(ref redis_url) = config_arc.redis_url {
+        let redis_config = RedisConfig::from_url(redis_url);
+        Some(
+            redis_config
+                .create_pool(Some(deadpool::Runtime::Tokio1))
+                .expect("Failed to create Redis pool"),
+        )
+    } else {
+        tracing::warn!("REDIS_URL not set — Redis is disabled");
+        None
+    };
 
     // SMTP mailer using lettre's async STARTTLS transport.
     // Credentials are injected at build time; the connection is lazy (connects on first send).

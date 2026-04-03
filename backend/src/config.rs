@@ -51,7 +51,7 @@ pub struct AppConfig {
     pub database_url: String,
 
     // ── Redis ─────────────────────────────────────────────────────────────────
-    pub redis_url: String,
+    pub redis_url: Option<String>,
 
     // ── JWT — HS256 secret + TTLs in minutes ──────────────────────────────────
     pub jwt_secret: String,
@@ -90,7 +90,7 @@ impl AppConfig {
 
         Ok(Self {
             database_url: settings.get_string("DATABASE_URL")?,
-            redis_url: settings.get_string("REDIS_URL")?,
+            redis_url: settings.get_string("REDIS_URL").ok(),
             jwt_secret: settings.get_string("JWT_SECRET")?,
             jwt_access_ttl: settings.get_int("JWT_ACCESS_TTL")? as i64,
             jwt_refresh_ttl: settings.get_int("JWT_REFRESH_TTL")? as i64,

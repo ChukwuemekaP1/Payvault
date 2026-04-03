@@ -3,6 +3,7 @@
 //! Axum handler via `Arc` — all inner fields are already `Arc`-wrapped.
 
 use crate::config::AppConfig;
+use crate::error::{AppError, Result};
 use deadpool_redis::Pool;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
@@ -17,9 +18,8 @@ pub struct AppState {
     /// SQLx async Postgres connection pool (max 10 connections).
     pub db: PgPool,
 
-    /// deadpool-redis async connection pool — used for OTPs, rate limiting,
-    /// idempotency keys, and refresh-token hashes.
-    pub redis: Arc<Pool>,
+    /// deadpool-redis async connection pool — optional; None when REDIS_URL is not set.
+    pub redis: Option<Arc<Pool>>,
 
     /// Immutable config loaded once at startup; shared read-only everywhere.
     pub config: Arc<AppConfig>,
@@ -30,12 +30,26 @@ pub struct AppState {
 
 impl AppState {
     /// Wraps each resource in Arc so the resulting state is cheaply cloneable.
-    pub fn new(db: PgPool, redis: Pool, config: Arc<AppConfig>, mailer: Mailer) -> Self {
+    pub fn new(db: PgPool, redis: Option<Pool>, config: Arc<AppConfig>, mailer: Mailer) -> Self {
         Self {
             db,
-            redis: Arc::new(redis),
+            redis: redis.map(|r| Arc::new(r)),
             config,
             mailer: Arc::new(mailer),
+        }
+    }
+
+    /// Get a Redis connection, or return an error if Redis is not configured.
+    pub async fn redis(&self) -> Result<deadpool_redis::Connection> {
+        match &self.redis {
+            Some(pool) => pool.get().await.map_err(|e| {
+                tracing::error!("Redis connection failed: {}", e);
+                AppError::Internal
+            }),
+            None => {
+                tracing::warn!("Redis operation attempted but REDIS_URL is not set");
+                Err(AppError::Internal)
+            }
         }
     }
 }
