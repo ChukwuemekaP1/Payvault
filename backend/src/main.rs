@@ -79,8 +79,9 @@ async fn main() -> Result<()> {
     create_admin_user(&state, &config_arc).await?;
 
     // CORS: allow Vercel frontend + any origin for development.
+    // Default is "*" (wildcard) to allow any Vercel deployment URL.
     let allowed_origins = std::env::var("ALLOWED_ORIGINS")
-        .unwrap_or_else(|_| "https://payvault-iota.vercel.app".to_string());
+        .unwrap_or_else(|_| "*".to_string());
 
     let cors = if config_arc.is_production() && allowed_origins != "*" {
         let origins: Vec<_> = allowed_origins

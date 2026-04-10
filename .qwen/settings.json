@@ -13,7 +13,8 @@
       "Bash(node *)",
       "Bash(./node_modules/.bin/vite *)",
       "Bash(do *)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(head *)"
     ]
   },
   "$version": 3
