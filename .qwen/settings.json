@@ -8,7 +8,12 @@
       "Bash(git commit *)",
       "Bash(curl *)",
       "Bash(python3 *)",
-      "Bash(echo *)"
+      "Bash(echo *)",
+      "Bash(npx *)",
+      "Bash(node *)",
+      "Bash(./node_modules/.bin/vite *)",
+      "Bash(do *)",
+      "Bash(done)"
     ]
   },
   "$version": 3
