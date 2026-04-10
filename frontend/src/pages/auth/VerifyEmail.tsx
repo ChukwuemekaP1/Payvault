@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "../../lib/utils";
-import { verifyEmail, registerUser, getApiErrorMessage } from "../../lib/api";
+import { verifyEmail, getApiErrorMessage } from "../../lib/api";
 import { Button } from "../../components/ui/button";
 
 import { Label } from "../../components/ui/label";
@@ -212,7 +212,7 @@ const VerifyEmail: React.FC = () => {
   const [otpError, setOtpError] = React.useState<string | null>(null);
   const [verifySuccess, setVerifySuccess] = React.useState(false);
 
-  const { remaining, canResend, restart } = useResendCooldown(60);
+  const { remaining, canResend } = useResendCooldown(60);
 
   // ── Auto-submit when 6 digits are entered ─────────────────────────────────
   React.useEffect(() => {
@@ -266,29 +266,18 @@ const VerifyEmail: React.FC = () => {
     if (!canResend || isResending || !email) return;
 
     setIsResending(true);
-    setOtpError(null);
-    setOtp("");
 
-    try {
-      // Re-call /auth/register with the same email to trigger a new OTP email
-      // (backend re-sends the verification code on duplicate register attempts)
-      await registerUser({ email, password: "" }).catch(() => {
-        // The backend likely returns 409 (conflict) for existing emails,
-        // but should still dispatch a new OTP. We swallow the error here
-        // and notify the user optimistically.
-      });
+    // NOTE: OTP is currently disabled on the backend (Redis unavailable).
+    // Users are auto-verified on registration, so this page should not be
+    // reached in normal flow. If it is, inform the user.
+    toast.info("Auto-verification enabled", {
+      description: "Your account is already active. Redirecting to dashboard…",
+      duration: 5000,
+    });
 
-      toast.success("Verification code resent!", {
-        description: `Check your inbox at ${email}`,
-      });
-
-      restart();
-    } catch (err: unknown) {
-      const message = getApiErrorMessage(err);
-      toast.error("Could not resend code", { description: message });
-    } finally {
-      setIsResending(false);
-    }
+    // Redirect to dashboard after brief pause
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    navigate("/dashboard", { replace: true });
   };
 
   // ── Manual submit (if user doesn't auto-trigger) ──────────────────────────

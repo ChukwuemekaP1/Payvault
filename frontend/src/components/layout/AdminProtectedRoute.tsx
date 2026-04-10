@@ -3,11 +3,15 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 
 const AdminProtectedRoute: React.FC = () => {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const { isAuthenticated, user } = useAuthStore();
 
   if (!isAuthenticated) {
-    // Redirect to admin login page, not regular login
     return <Navigate to="/admin/login" replace />;
+  }
+
+  // Client-side role check — backend middleware enforces this too (403)
+  if (user?.role !== "admin") {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <Outlet />;

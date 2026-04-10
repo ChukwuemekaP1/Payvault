@@ -80,6 +80,7 @@ export async function registerUser(data: RegisterRequest): Promise<void> {
   await api.post("/auth/register", {
     email: data.email,
     password: data.password,
+    name: data.name,
   });
 }
 

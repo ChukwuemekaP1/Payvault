@@ -66,7 +66,7 @@ export interface ApiError {
 export interface RegisterRequest {
   email: string;
   password: string;
-  name?: string;
+  name: string;
 }
 
 export interface LoginRequest {
