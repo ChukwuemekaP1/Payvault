@@ -2,9 +2,9 @@
   "version": 2,
   "name": "payvault-frontend",
   "framework": null,
-  "installCommand": "cd frontend && npm install",
-  "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/dist",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "env": {
     "VITE_API_URL": "https://payvault-pr74.onrender.com"
   },
