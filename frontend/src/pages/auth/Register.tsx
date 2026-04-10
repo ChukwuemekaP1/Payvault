@@ -257,10 +257,13 @@ const Register: React.FC = () => {
         refresh_token: authResponse.refresh_token,
       });
 
-      // Pass the email to the verify-email page so it can display it
-      navigate("/auth/verify-email", {
-        state: { email: values.email },
+      toast.success("Account created and logged in!", {
+        description: "Your account is active. Welcome to PayVault!",
       });
+
+      // Users are auto-verified on registration (OTP disabled on backend)
+      // Redirect directly to dashboard
+      navigate("/dashboard", { replace: true });
     } catch (err: unknown) {
       const message = getApiErrorMessage(err);
       setApiError(message);

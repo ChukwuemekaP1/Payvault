@@ -21,29 +21,6 @@ import type {
 
 const BASE_URL = import.meta.env.VITE_API_URL || "https://payvault-pr74.onrender.com";
 
-// ─── Refresh Token Queue ─────────────────────────────────────────────────────
-// Prevents multiple simultaneous refresh calls when many requests 401 at once.
-
-let isRefreshing = false;
-
-interface QueueItem {
-  resolve: (token: string) => void;
-  reject: (reason: unknown) => void;
-}
-
-let failedQueue: QueueItem[] = [];
-
-function processQueue(error: unknown, token: string | null) {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error || !token) {
-      reject(error);
-    } else {
-      resolve(token);
-    }
-  });
-  failedQueue = [];
-}
-
 // ─── Axios Instance ──────────────────────────────────────────────────────────
 
 export const api = axios.create({

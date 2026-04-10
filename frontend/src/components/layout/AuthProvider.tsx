@@ -1,7 +1,5 @@
 import * as React from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
-import { refreshTokens } from "../../lib/api";
 import { LoadingSpinner } from "../common/LoadingSpinner";
 
 interface AuthProviderProps {

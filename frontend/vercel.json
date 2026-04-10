@@ -11,6 +11,9 @@
       "NODE_ENV": "production"
     }
   },
+  "env": {
+    "VITE_API_URL": "https://payvault-pr74.onrender.com"
+  },
   "headers": [
     {
       "source": "/assets/(.*)",

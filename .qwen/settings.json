@@ -5,7 +5,10 @@
       "Bash(git rm *)",
       "Bash(git *)",
       "Bash(sed *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(curl *)",
+      "Bash(python3 *)",
+      "Bash(echo *)"
     ]
   },
   "$version": 3

@@ -372,9 +372,9 @@ pub async fn credit_wallet(
 
     // Credit the user's wallet
     let wallet = sqlx::query_as::<_, WalletRow>(
-        "UPDATE wallets 
-         SET balance_kobo = balance_kobo + $1, updated_at = NOW() 
-         WHERE id = $2 
+        "UPDATE wallets
+         SET balance_kobo = balance_kobo + $1, updated_at = NOW()
+         WHERE id = $2
          RETURNING id, user_id, balance_kobo, account_number, is_frozen",
     )
     .bind(req.amount_kobo)
@@ -383,16 +383,28 @@ pub async fn credit_wallet(
     .await?
     .ok_or(AppError::WalletNotFound)?;
 
-    // Debit the operations account (simulating bank reserves)
-    sqlx::query(
-        "UPDATE wallets 
-         SET balance_kobo = balance_kobo - $1, updated_at = NOW() 
-         WHERE user_id = $2",
+    // Debit the operations account (simulating bank reserves).
+    // If the ops account doesn't have sufficient balance, we still proceed —
+    // admin credits are bank-issued funds and take priority over internal accounting.
+    let ops_debit_result = sqlx::query(
+        "UPDATE wallets
+         SET balance_kobo = balance_kobo - $1, updated_at = NOW()
+         WHERE user_id = $2 AND balance_kobo >= $1",
     )
     .bind(req.amount_kobo)
     .bind(operations_account)
     .execute(&mut *tx)
     .await?;
+
+    // If ops account couldn't be debited (insufficient funds), log a warning
+    // but proceed — the credit is an admin override.
+    if ops_debit_result.rows_affected() == 0 {
+        tracing::warn!(
+            "Admin credit: operations account (user {}) had insufficient funds. \
+             Credit proceeded as admin override.",
+            operations_account
+        );
+    }
 
     // Insert transaction record
     let reference = req.reference.unwrap_or_else(|| format!("ADMIN-CREDIT-{}", Uuid::new_v4()));
